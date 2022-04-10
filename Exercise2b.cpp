@@ -1,7 +1,8 @@
 #include <chrono>
 #include <iostream>
+#include <map>
+#include <numeric>
 #include <random>
-#include <unordered_map>
 
 enum Weather { Sunny, Cloudy, Rainy };
 
@@ -64,20 +65,30 @@ int main(int argc, char *argv[]) {
   std::random_device rd;
   std::mt19937 gen(rd());
 
-  //   const auto weather_today = Weather::Rainy;
   const auto weather_today = static_cast<Weather>(rand() % 3);
 
-  const auto weather_tomorrow =
-      static_cast<Weather>(dist_generator[weather_today](gen));
-
   auto weather_arr = std::vector<Weather>(static_cast<size_t>(n_days));
+  auto weather_count = std::map<Weather, int>{};
+
   weather_arr[0] = weather_today;
+  weather_count[weather_today]++;
+
   std::cout << "Day 0: " << weather_arr[0] << std::endl;
 
   for (size_t i = 1; i < n_days; i++) {
     weather_arr[i] =
         static_cast<Weather>(dist_generator[weather_arr[i - 1]](gen));
-    std::cout << "Day " << i << ": " << weather_arr[i] << std::endl;
+    // std::cout << "Day " << i << ": " << weather_arr[i] << std::endl;
+    weather_count[weather_arr[i]]++;
+  }
+
+  std::cout << std::endl << std::endl;
+  for (auto &w_count : weather_count) {
+    std::cout << "Number of " << w_count.first << " days: " << w_count.second
+              << std::endl;
+    std::cout << "Stationary probability of " << w_count.first << ": "
+              << static_cast<float>(w_count.second) / weather_arr.size()
+              << std::endl;
   }
 
   return EXIT_SUCCESS;
